@@ -411,7 +411,168 @@ __________________________________________________
 ### Adding Sparkline Charts
 
 - install a library called 'react-sparklines'
-- $ npm i --save react-sparklines@1.6.0
+- **$ npm i --save react-sparklines@1.6.0**
+
+```javascript
+import React, { Component } from 'react'; 
+import { connect } from 'react-redux'; 
+import { Sparklines, SparklinesLine } from 'react-sparklines'; 
+
+class WeatherList extends Component {
+	renderWeather(cityData){
+		const name = cityData.city.name; 
+		const temps = cityData.list.map(weather => weather.main.temp); 
+		const humidity = cityData.list.map(weather => weather.main.humidity); 
+		const pressure = cityData.list.map(weather => weather.main.pressure); 
+
+		return (
+			<tr key={name}>
+				<td>{name}</td>
+				<td>
+					<Sparklines height={120} width={180} data={temps}>
+						<SparklinesLine color="red" />
+					</Sparklines>
+				</td>
+			</tr>
+		); 
+	}
+
+	render() {
+		return (
+			<table className="table table-hover">
+				<thead>
+					<tr>
+						<th>City</th>
+						<th>Temperature</th>
+						<th>Pressure</th>
+						<th>Humidity</th>
+					</tr>
+				</thead>
+				<tbody>
+					{this.props.weather.map(this.renderWeather)}
+				</tbody>
+			</table>
+		); 
+	}
+}
+
+
+// function mapStateToProps(state) {
+// 	return { weather: state.weather }; 
+	// we can use state.weather and 'weather' as a property because we defined 'weather' as a property in reducers/index.js
+// }
+
+// ES6 way: 
+function mapStateToProps({ weather }) {
+	return { weather }; // { weather } === { weather: weather }
+}
+
+export default connect(mapStateToProps)(WeatherList); 
+```
+
+__________________________________________________
+
+### Making a Reusable Chart Component 
+
+- this will be repeated in containers/weather_list.js: 
+```javascript
+<Sparklines height={120} width={180} data={temps}>
+	<SparklinesLine color="red" />
+</Sparklines>
+``` 
+- Hence we will make it a component
+- We will make it a functional component 
+- components/chart.js: 
+
+```javascript
+import React from 'react'; 
+import { Sparklines, SparklinesLine } from 'react-sparklines'; 
+
+export default (props) => {
+	return (
+		<div>
+			<Sparklines height={120} width={180} data={props.data}>
+				<SparklinesLine color={props.color} />
+			</Sparklines>
+		</div>
+		); 
+}
+``` 
+- updated **containers/weather_list.js**: 
+
+```javascript
+class WeatherList extends Component {
+	renderWeather(cityData){
+		const name = cityData.city.name; 
+		const temps = cityData.list.map(weather => weather.main.temp); 
+		const humidity = cityData.list.map(weather => weather.main.humidity); 
+		const pressure = cityData.list.map(weather => weather.main.pressure); 
+
+		return (
+			<tr key={name}>
+				<td>{name}</td>
+				<td>
+					<Chart data={temps} color="orange" />
+				</td>
+			</tr>
+		); 
+	}
+``` 
+
+__________________________________________________
+
+### Labelling of Units
+
+- **using lodash library**
+
+```javascript
+import React, { Component } from 'react'; 
+import _ from 'lodash'; 
+import { connect } from 'react-redux'; 
+import Chart from '../components/chart'; 
+
+
+class WeatherList extends Component {
+	renderWeather(cityData){
+		const name = cityData.city.name; 
+		const temps = _.map(cityData.list.map(weather => weather.main.temp), (temp) => temp - 273); 
+		const pressures = cityData.list.map(weather => weather.main.pressure); 
+		const humidities = cityData.list.map(weather => weather.main.humidity);
+
+		return (
+			<tr key={name}>
+				<td>{name}</td>
+				<td><Chart data={temps} color="orange" units="°C" /></td>
+				<td><Chart data={pressures} color="green" units="hPa" /></td>
+				<td><Chart data={pressures} color="black" units="%" /></td>
+			</tr>
+		); 
+	}
+
+	render() {
+		return (
+			<table className="table table-hover">
+				<thead>
+					<tr>
+						<th>City</th>
+						<th>Temperature (°C)</th>
+						<th>Pressure (hPa)</th>
+						<th>Humidity (%)</th>
+					</tr>
+				</thead>
+				<tbody>
+					{this.props.weather.map(this.renderWeather)}
+				</tbody>
+			</table>
+		); 
+	}
+}
+```
+
+__________________________________________________
+
+### Google Maps Integration 
+
 
 
 
