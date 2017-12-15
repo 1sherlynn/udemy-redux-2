@@ -573,7 +573,67 @@ __________________________________________________
 
 ### Google Maps Integration 
 
+- src/components/google_map.js: 
+```javascript
+import React, { Component } from 'react'; 
 
+class GoogleMap extends Component {
+	componentDidMount() { //lifecycle method
+		new google.maps.Map(this.refs.map, { //this.refs.map is where we will render the map
+			zoom: 12, //level of zooming in and out 
+			center: { //tells google maps where we want to center it 
+				lat: this.props.lat,
+				lng: this.props.lon //lng versus lon mismatch. Take note.
+		}
+	}); 
+}
+
+	render () {
+		// we can then use this.refs.map
+		return <div ref="map" />; 
+	}
+}
+
+export default GoogleMap; 
+```
+
+
+- src/containers/weather_list.js: 
+```javascript
+...
+import GoogleMap from '../components/google_map';
+
+class WeatherList extends Component {
+	renderWeather(cityData){
+		...
+		const { lon, lat } = cityData.city.coord; 
+
+		return (
+			<tr key={name}>
+				<td><GoogleMap lon={lon} lat={lat} /></td>
+				...
+			</tr>
+		); 
+	}
+```
+
+__________________________________________________
+
+### Project Review
+
+- Action Creator where we used a constant to store the action creator to prevent typos in the string 
+```javascript
+export const FETCH_WEATHER = 'FETCH_WEATHER'
+
+```
+- **Axios** to make our AJAX request
+- **Redux-promise middleware** usage to **receive promises**. Especially helpful as it can automatically detect a payload which is a promise. 
+- If it is a promise, it **stops the action and waits for the promise to resolve**. Once resolved, it will take the data coming back from the request, stuck it on the **payload** property and send the action on to all of the reducers 
+- So although we wrote an AJAX requent that is inherently asynchronous code, we didn't really have to think of the asynchronous nature of the code at all (we don't have to handle promises and callbacks etc)
+
+- **Avoid mutating state**, don't use push, use **concat** or ES6: [ action.payload.data, ...state ]
+- Sparkline library: small, at a glance charts
+- Google Maps components
 
 
 
